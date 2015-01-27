@@ -15,9 +15,12 @@ https://groups.google.com/forum/#!searchin/etetoolkit/x$20server$20/etetoolkit/X
 
 
 Add this to /etc/apache2/httpd.conf:
+<pre><code>
 FastCGIExternalServer /webdata/sd_web/sd_server/sd_server.fcgi -host 193.197.73.70:2222
+</pre></code>
 
 Add this to /etc/apache2/sites-enabled/000-default:
+<pre><code>
 <VirtualHost *:80>
   ServerName species.h-its.org
   DocumentRoot /webdata/sd_web/sd_server
@@ -29,17 +32,19 @@ Add this to /etc/apache2/sites-enabled/000-default:
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^/(.*)$ /sd_server.fcgi/$1 [QSA,L]
 </VirtualHost>
- 
+</pre></code>
+
+<pre><code> 
 export DISPLAY=localhost:0.0
 python manage.py runfcgi method=threaded host=193.197.73.70 port=2222
-
 sudo service apache2 restart
+</pre></code>
 
 
 INSTALL R GMYC:
-install.packages("ape",repos="http://cran.r-project.org/")
-install.packages("paran",repos="http://cran.r-project.org/")
-install.packages("splits",repos="http://R-Forge.R-project.org")
+- install.packages("ape",repos="http://cran.r-project.org/")
+- install.packages("paran",repos="http://cran.r-project.org/")
+- install.packages("splits",repos="http://R-Forge.R-project.org")
 
 $Rscript gmyc.script.R tree method
 
