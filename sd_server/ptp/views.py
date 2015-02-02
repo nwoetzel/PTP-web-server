@@ -249,11 +249,14 @@ def run_ptp_sge(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = 
 
 def server_stats():
     #return avaliable and total slots
-    p1 = Popen(['qstat', '-g', 'c'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    stdout = p1.communicate()[0]
-    solines = stdout.split("\n")
-    sstats = solines[2].split()
-    return sstats[4], sstats[5]
+    try: 
+        p1 = Popen(['qstat', '-g', 'c'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        stdout = p1.communicate()[0]
+        solines = stdout.split("\n")
+        sstats = solines[2].split()
+        return sstats[4], sstats[5]
+    except:
+        return 0, 0
 
 
 def generate_sge_script(scommand, fout):
@@ -268,7 +271,10 @@ def generate_sge_script(scommand, fout):
 
     
 def job_submission(fscript):
-    p1 = Popen(['qsub', fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    try:
+        p1 = Popen(['qsub', fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    except:
+        return False
     stdout = p1.communicate()[0]
     solines = stdout.split("\n")
     if solines[0].endswith("has been submitted"):
