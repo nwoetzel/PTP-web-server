@@ -120,7 +120,7 @@ def ptp_index(request):
             removeog = ptp_form.cleaned_data['removeog']
             
             #os.chmod(filepath, 0777)
-            jobok = run_ptp_sge(
+            jobok = run_ptp_queue(
                         fin = newfilename,
                         fout = filepath + "output",
                         rooted = (ptp_form.cleaned_data['rooted'] == "rooted"),
@@ -225,7 +225,7 @@ def run_ptp(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = Fals
                 "-b", str(burnin), "-g", outgroup, "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
 
             
-def run_ptp_sge(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = False,  rooted = False):
+def run_ptp_queue(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = False,  rooted = False):
     command = ""
     if rooted:
         if outgroup == "":
