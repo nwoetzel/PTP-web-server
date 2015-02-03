@@ -8,4 +8,3 @@ class Jobs(models.Model):
     parameter = models.CharField(max_length=100)
     upload_time = models.DateTimeField(auto_now_add = True)
     filepath = models.CharField(max_length=200, default="None")
-    

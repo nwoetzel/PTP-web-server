@@ -1,11 +1,9 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.conf import settings
 from django import forms
 from models import Jobs
 from subprocess import Popen
-from subprocess import call
 import subprocess
 import os
 import logging
@@ -41,8 +39,6 @@ class jobform(forms.Form):
 
 def index(request):
     frees, totals = server_stats() 
-    print(frees)
-    print(total)
     context = {'avaliable':frees, 'total':totals}
     return render(request, 'index.html', context)
 
@@ -124,10 +120,16 @@ def ptp_index(request):
             removeog = ptp_form.cleaned_data['removeog']
             
             #os.chmod(filepath, 0777)
-            if ptp_form.cleaned_data['rooted'] == "rooted":
-                jobok = run_ptp_sge(fin = newfilename, fout = filepath + "output", rooted = True, nmcmc = nmcmc, imcmc = imcmc, burnin = burnin, seed = seed, outgroup = outgroups, remove = removeog)
-            else:
-                jobok = run_ptp_sge(fin = newfilename, fout = filepath + "output", rooted = False, nmcmc = nmcmc, imcmc = imcmc, burnin = burnin, seed = seed, outgroup = outgroups, remove = removeog)
+            jobok = run_ptp_sge(
+                        fin = newfilename,
+                        fout = filepath + "output",
+                        rooted = (ptp_form.cleaned_data['rooted'] == "rooted"),
+                        nmcmc = nmcmc,
+                        imcmc = imcmc,
+                        burnin = burnin,
+                        seed = seed,
+                        outgroup = outgroups,
+                        remove = removeog)
             
             #return HttpResponseRedirect('result/') # Redirect after POST
             if jobok:
