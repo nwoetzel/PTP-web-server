@@ -169,7 +169,7 @@ def show_ptp_result(request, job_id = "", email = ""):
     elif os.path.exists(out_path + ".err"):
         with open(out_path + ".err") as outfile2:
             lines2 = outfile2.readlines()
-            if len(lines2) > 3:
+            if len(lines2) > 0:
                 return render(request, 'ptp/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email, 'avaliable':frees, 'total':totals})
             else:
                 return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'avaliable':frees, 'total':totals})
