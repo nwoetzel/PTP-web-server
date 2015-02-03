@@ -9,6 +9,7 @@ from subprocess import call
 import subprocess
 import os
 import logging
+from time import sleep
 
 logger = logging.getLogger(__name__)
 
@@ -289,14 +290,26 @@ def generate_sge_script(scommand, fout):
         fsh.write(scommand + "\n")
     return fout+".sge.sh"
 
-    
+
 def job_submission(fscript):
     try:
         p1 = Popen(['qsub', fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     except OSError as e:
-        logger.error('error in qsub ' + str(e))
+        logger.error('error in qsub ' + str(e) + '\nstderr:\n' + p1.communicate()[1])
         return False
-    stdout = p1.communicate()[0]
-    solines = stdout.split("\n")
-    return solines[0].endswith("has been submitted")
+    # try for 5 seocnds if job is done
+    i = 0
+    while p1.poll() is None:
+        ++i
+        if( i >=5):
+            p1.kill()
+            logger.error('qsub does not finish within 5 seconds')
+            return False
+        sleep( 1)
+    #success
+    if( p1.returncode == 0):
+        return True
+    
+    logger.error('qsub was not successful:\nreturncode:\n' + str(p1.returncode) + '\nstdout:\n' + p1.communicate()[0] + '\nstderr:\n' + p1.communicate()[1])
+    return False
 
