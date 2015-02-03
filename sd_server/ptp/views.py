@@ -245,8 +245,11 @@ def run_ptp_sge(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = 
             else:
                 command = " ".join(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"])
-    sge_script = generate_sge_script(scommand = command, fout = fout)
-    jobok = job_submission(fscript = sge_script)
+#     sge_script = generate_sge_script(scommand = command, fout = fout)
+#     jobok = job_submission(fscript = sge_script)
+    pbs_script = generate_pbs_script(scommand = command, fout = fout)
+    jobok = job_submission(fscript = pbs_script)
+
     return jobok
 
 
@@ -259,8 +262,21 @@ def server_stats():
         sstats = solines[2].split()
         return sstats[4], sstats[5]
     except OSError as e:
-        logger.error('error in qsub ' + str(e))
-        return 0, 0
+        logger.error('error in qstat ' + str(e))
+    except IndexError as e:
+        logger.error('error in qstat ' + str(e))
+    return 0, 0
+
+def generate_pbs_script(scommand, fout):
+    filename = fout+".pbs.sh"
+    with open(filename, "w") as fsh:
+        fsh.write("#!/bin/bash \n")
+        fsh.write("#PBS -S /bin/bash \n")
+        fsh.write("#PBS -o "+ fout + ".out \n")
+        fsh.write("#PBS -e "+ fout + ".err \n")
+        fsh.write("#PBS -v DISPLAY \n")
+        fsh.write(scommand + "\n")
+    return filename
 
 
 def generate_sge_script(scommand, fout):
