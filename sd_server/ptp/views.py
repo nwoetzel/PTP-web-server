@@ -275,9 +275,10 @@ def generate_pbs_script(scommand, fout):
     with open(filename, "w") as fsh:
         fsh.write("#!/bin/bash \n")
         fsh.write("#PBS -S /bin/bash \n")
-        fsh.write("#PBS -o "+ fout + ".out \n")
+        fsh.write("#PBS -o "+ fout + "\n")
         fsh.write("#PBS -e "+ fout + ".err \n")
-        fsh.write("#PBS -v DISPLAY \n")
+        fsh.write("export DISPLAY=:1\n")
+        fsh.write("Xvfb $DISPLAY -auth /dev/null &")
         fsh.write(scommand + "\n")
     return filename
 
