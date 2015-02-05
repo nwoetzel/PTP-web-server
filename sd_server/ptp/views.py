@@ -55,8 +55,8 @@ def thanks(request):
 def autherror(request):
     return HttpResponse("Job id does not exists or e-mail address does not match!")
 
-def sge_error(request):
-    return HttpResponse("There is something wrong with the SGE, please try again later!")
+def queue_error(request):
+    return HttpResponse("There is something wrong with the computational queue, please try again later!")
 
 def findjob(request):
     if request.method == 'POST': # If the form has been submitted...
@@ -135,7 +135,7 @@ def ptp_index(request):
             if jobok:
                 return show_ptp_result(request, job_id = repr(job.id), email = job.email)
             else:
-                return sge_error(request)
+                return queue_error(request)
     else:
         ptp_form = PTPForm() # An unbound form
     context = {'pform':ptp_form, 'avaliable':frees, 'total':totals}
