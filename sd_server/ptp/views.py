@@ -76,7 +76,7 @@ def findjob(request):
                 with open(out_path + ".err") as outfile2:
                     lines2 = outfile2.readlines()
                     if len(lines) > 5:
-                        results="<br>".join(lines)
+                        results="<br/>".join(lines)
                         context = {'result':results, 'jobid':job_id, 'email':email}
                         return render(request, 'ptp/results.html', context)
                     else:
@@ -163,7 +163,7 @@ def show_ptp_result(request, job_id = "", email = ""):
     if os.path.exists(outpar) and os.path.exists(outplot):
         with open(out_path) as outfile:
             lines = outfile.readlines()
-            results="<br>".join(lines)
+            results="<br/>".join(lines)
             context = {'result':results, 'jobid':job_id, 'email':email, 'avaliable':frees, 'total':totals}
             return render(request, 'ptp/results.html', context)
     elif os.path.exists(out_path + ".err"):
@@ -186,7 +186,7 @@ def show_phylomap_result(request):
         if os.path.exists(out_path_var):
             with open(out_path_var) as outfile:
                 lines = outfile.readlines()
-                results="<br>".join(lines)
+                results="<br/>".join(lines)
             context['result'] = results
         return render(request, 'ptp/phylomap.html', context)
     else:

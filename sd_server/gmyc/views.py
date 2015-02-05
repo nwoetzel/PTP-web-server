@@ -88,7 +88,7 @@ def show_gmyc_result(request, job_id = "", email = ""):
     if os.path.exists(out_path) and os.path.exists(plot):
         with open(out_path) as outfile:
             lines = outfile.readlines()
-            results="<br>".join(lines)
+            results="<br/>".join(lines)
             context = {'result':results, 'jobid':job_id}
             return render(request, 'gmyc/results.html', context)
     else:
@@ -123,7 +123,7 @@ def run_gmyc_queue(fin, fout, mode = "s"):
     fin -- filename of input file
     fout -- filename of output file
     '''
-    command = " ".join( settings.MEDIA_ROOT + "bin/gmyc.script.R",fin,mode)
+    command = " ".join([settings.MEDIA_ROOT + "bin/gmyc.script.R",fin,mode])
     pbs_script = generate_pbs_script(scommand = command, fout = fout)
     jobok = job_submission(fscript = pbs_script)
 
