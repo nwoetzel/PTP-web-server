@@ -155,5 +155,5 @@ def job_submission(fscript):
     if( p1.returncode == 0):
         return True
     
-    logger.error('qsub was not successful:\nreturncode:\n' + str(p1.returncode) + '\nstdout:\n' + p1.communicate()[0] + '\nstderr:\n' + p1.communicate()[1])
+    logger.error('qsub was not successful:\nreturncode:\n' + str(p1.returncode))
     return False
