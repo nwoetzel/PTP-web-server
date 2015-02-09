@@ -277,6 +277,7 @@ def generate_pbs_script(scommand, fout):
         fsh.write("#PBS -S /bin/bash \n")
         fsh.write("#PBS -o "+ fout + "\n")
         fsh.write("#PBS -e "+ fout + ".err \n")
+        fsh.write("#PBS -W umask=022\n") # readable by group and all also
         fsh.write("export DISPLAY=:1\n")
         fsh.write("Xvfb $DISPLAY -auth /dev/null &")
         fsh.write(scommand + "\n")
