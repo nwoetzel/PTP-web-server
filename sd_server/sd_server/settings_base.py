@@ -4,7 +4,7 @@ from configurations import Configuration, values
 import os
 
 class Base(Configuration):
-    PROJECT_DIR = values.PathValue( os.path.abspath(os.path.join( os.path.dirname(__file__),"..")))
+    PROJECT_DIR = os.path.abspath(os.path.join( os.path.dirname(__file__),".."))
     # Local time zone for this installation. Choices can be found here:
     # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
     # although not all choices may be available on all operating systems.
@@ -24,7 +24,7 @@ class Base(Configuration):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': os.path.join(PROJECT_DIR,'sqlite.db'), # Or path to database file if using sqlite3.
+            'NAME': values.PathValue( os.path.join(PROJECT_DIR,'sqlite.db')), # Or path to database file if using sqlite3.
             # The following settings are not used with sqlite3:
             'USER': '',
             'PASSWORD': '',
