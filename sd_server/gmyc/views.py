@@ -45,9 +45,9 @@ def gmyc_index(request):
             job.data_type = "umtree"
             job.method = "GMYC"
             job.save()
-            filepath = os.path.join( [settings.JOB_FOLDER, repr(job.id)])
+            filepath = os.path.join( settings.JOB_FOLDER, str(job.id))
             os.mkdir(filepath)
-            newfilename = os.path.join( [filepath, "input.tre"])
+            newfilename = os.path.join( filepath, "input.tre")
             handle_uploaded_file(fin = request.FILES['treefile'] , fout = newfilename)
             job.filepath = filepath
             job.save()
@@ -58,7 +58,7 @@ def gmyc_index(request):
             
             jobok = run_gmyc_queue(fin = newfilename, fout = filepath + "output", mode = mode)
             if jobok:
-                return show_gmyc_result(request, job_id = repr(job.id), email = job.email)
+                return show_gmyc_result(request, job_id = str(job.id), email = job.email)
             else:
                 return queue_error(request)
             
@@ -80,10 +80,10 @@ def show_gmyc_result(request, job_id = "", email = ""):
     else:
         return autherror(request)
     
-    out_path = os.path.join( [settings.JOB_FOLDER, job_id, "input.tre_summary"])
+    out_path = os.path.join( settings.JOB_FOLDER, job_id, "input.tre_summary")
     #screenout = settings.MEDIA_ROOT + job_id + "/output"
-    err = os.path.join( [settings.JOB_FOLDER, job_id, "output.err"])
-    plot = os.path.join( [settings.JOB_FOLDER, job_id, "input.tre_plot.png"])
+    err = os.path.join( settings.JOB_FOLDER, job_id, "output.err")
+    plot = os.path.join( settings.JOB_FOLDER, job_id, "input.tre_plot.png")
     
     if os.path.exists(out_path) and os.path.exists(plot):
         with open(out_path) as outfile:

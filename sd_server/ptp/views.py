@@ -70,7 +70,7 @@ def findjob(request):
                     return autherror(request)
             else:
                 return autherror(request)
-            out_path = os.path.join( [settings.JOB_FOLDER, job_id, "output"])
+            out_path = os.path.join( settings.JOB_FOLDER, job_id, "output")
             with open(out_path) as outfile:
                 lines = outfile.readlines()
                 with open(out_path + ".err") as outfile2:
@@ -104,9 +104,9 @@ def ptp_index(request):
                 job.data_type = "ptree"
             job.method = "PTP"
             job.save()
-            filepath = os.path.join( [settings.JOB_FOLDER, repr(job.id)]) 
+            filepath = os.path.join( settings.JOB_FOLDER, str(job.id)) 
             os.mkdir(filepath)
-            newfilename = os.path.join([filepath,"input.tre"])
+            newfilename = os.path.join(filepath,"input.tre")
             handle_uploaded_file(fin = request.FILES['treefile'] , fout = newfilename)
             job.filepath = filepath
             job.save()
@@ -122,7 +122,7 @@ def ptp_index(request):
             #os.chmod(filepath, 0777)
             jobok = run_ptp_queue(
                         fin = newfilename,
-                        fout = os.path.join([filepath,"output"]),
+                        fout = os.path.join(filepath,"output"),
                         rooted = (ptp_form.cleaned_data['rooted'] == "rooted"),
                         nmcmc = nmcmc,
                         imcmc = imcmc,
@@ -133,7 +133,7 @@ def ptp_index(request):
             
             #return HttpResponseRedirect('result/') # Redirect after POST
             if jobok:
-                return show_ptp_result(request, job_id = repr(job.id), email = job.email)
+                return show_ptp_result(request, job_id = str(job.id), email = job.email)
             else:
                 return queue_error(request)
     else:
@@ -154,9 +154,9 @@ def show_ptp_result(request, job_id = "", email = ""):
     else:
         return autherror(request)
     
-    out_path = os.path.join( [settings.JOB_FOLDER, job_id, "output"])
-    outpar = os.path.join( [settings.JOB_FOLDER, job_id, "output.PTPPartitonSummary.txt"])
-    outplot = os.path.join( [settings.JOB_FOLDER, job_id, "output.PTPhSupportPartition.txt.png"])
+    out_path = os.path.join( settings.JOB_FOLDER, job_id, "output")
+    outpar = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPPartitonSummary.txt")
+    outplot = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPhSupportPartition.txt.png")
     
     frees, totals = server_stats() 
     
@@ -179,8 +179,8 @@ def show_ptp_result(request, job_id = "", email = ""):
 
 def show_phylomap_result(request):
     job_id = request.GET.get('job_id', '')
-    out_path_line = os.path.join( [settings.JOB_FOLDER, job_id, "output.phylomap.line.txt"])
-    out_path_var = os.path.join( [settings.JOB_FOLDER, job_id, "output.phylomap.var"])
+    out_path_line = os.path.join( settings.JOB_FOLDER, job_id, "output.phylomap.line.txt")
+    out_path_var = os.path.join( settings.JOB_FOLDER, job_id, "output.phylomap.var")
     context = {'jobid':job_id}
     if os.path.exists(out_path_line):
         if os.path.exists(out_path_var):
