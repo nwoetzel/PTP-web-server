@@ -3,8 +3,8 @@ from configurations import Configuration, values
 
 import os
 
-class Base(Configuration):
-    PROJECT_DIR = os.path.abspath(os.path.join( os.path.dirname(__file__),".."))
+class Common(Configuration):
+    PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     # Local time zone for this installation. Choices can be found here:
     # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
     # although not all choices may be available on all operating systems.
@@ -24,7 +24,7 @@ class Base(Configuration):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': values.PathValue( os.path.join(PROJECT_DIR,'sqlite.db')), # Or path to database file if using sqlite3.
+            'NAME': os.path.join(PROJECT_DIR,'sqlite.db'), # Or path to database file if using sqlite3.
             # The following settings are not used with sqlite3:
             'USER': '',
             'PASSWORD': '',
@@ -85,17 +85,19 @@ class Base(Configuration):
 #        'django.contrib.staticfiles.finders.DefaultStorageFinder',
     ])
     
-    # Make this unique, and don't share it with anybody.
-    SECRET_KEY = 'w8pe*1leyn!_so&^299$2%v7n48l%$r=)951cv)539b=uw5egu'
+    # See: https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
+    # Note: This key only used for development and testing.
+    #       In production, this is changed to a values.SecretValue() setting
+    SECRET_KEY = 'CHANGEME!!!'
     
     # List of callables that know how to import templates from various sources.
-    TEMPLATE_LOADERS = values.BackendsValue([
+    TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     #     'django.template.loaders.eggs.Loader',
-    ])
+    )
     
-    MIDDLEWARE_CLASSES = values.BackendsValue([
+    MIDDLEWARE_CLASSES = (
         'django.middleware.common.CommonMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
@@ -103,7 +105,7 @@ class Base(Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
         # Uncomment the next line for simple clickjacking protection:
         # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ])
+    )
     
     ROOT_URLCONF = values.Value( 'sd_server.urls')
     
@@ -114,10 +116,10 @@ class Base(Configuration):
         # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
         # Always use forward slashes, even on Windows.
         # Don't forget to use absolute paths, not relative paths.
-        os.path.join(PROJECT_DIR,'templates')
+        os.path.join(PROJECT_DIR,'templates'),
     )
     
-    INSTALLED_APPS = values.BackendsValue([
+    INSTALLED_APPS = (
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
@@ -130,7 +132,7 @@ class Base(Configuration):
         # 'django.contrib.admindocs',
         'ptp',
         'gmyc',
-    ])
+    )
     
     # A sample logging configuration. The only tangible logging
     # performed by this configuration is to send an email to

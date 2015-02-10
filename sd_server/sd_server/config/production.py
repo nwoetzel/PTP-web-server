@@ -1,7 +1,9 @@
 # Django settings for sd_server project.
-from settings_dev import Dev
+from .common import Common
+from configurations import values
 
-class Default(Dev):
+class Production(Common):
+    SECRET_KEY = values.SecretValue()
     PBS_USER = ''
     PBS_PROXY_USER = ''
     
@@ -13,4 +15,3 @@ class Default(Dev):
         if not self.PBS_PROXY_USER.empty():
             flags += " -P " + self.PBS_PROXY_USER
         return flags
-    pass

@@ -1,6 +1,6 @@
 # Django settings for sd_server project for development.
-from settings_base import Base
+from .common import Common
 
-class Dev(Base):
+class Development(Common):
     DEBUG = True
     TEMPLATE_DEBUG = DEBUG
