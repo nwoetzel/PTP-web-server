@@ -45,9 +45,9 @@ def gmyc_index(request):
             job.data_type = "umtree"
             job.method = "GMYC"
             job.save()
-            filepath = settings.MEDIA_ROOT + repr(job.id) + "/" 
+            filepath = os.path.join( [settings.JOB_FOLDER, repr(job.id)])
             os.mkdir(filepath)
-            newfilename = filepath + "input.tre"
+            newfilename = os.path.join( [filepath, "input.tre"])
             handle_uploaded_file(fin = request.FILES['treefile'] , fout = newfilename)
             job.filepath = filepath
             job.save()
@@ -80,10 +80,10 @@ def show_gmyc_result(request, job_id = "", email = ""):
     else:
         return autherror(request)
     
-    out_path = settings.MEDIA_ROOT + job_id + "/input.tre_summary"
+    out_path = os.path.join( [settings.JOB_FOLDER, job_id, "input.tre_summary"])
     #screenout = settings.MEDIA_ROOT + job_id + "/output"
-    err = settings.MEDIA_ROOT + job_id + "/output.err"
-    plot = settings.MEDIA_ROOT + job_id +"/input.tre_plot.png"
+    err = os.path.join( [settings.JOB_FOLDER, job_id, "output.err"])
+    plot = os.path.join( [settings.JOB_FOLDER, job_id, "input.tre_plot.png"])
     
     if os.path.exists(out_path) and os.path.exists(plot):
         with open(out_path) as outfile:
@@ -124,7 +124,7 @@ def run_gmyc_queue(fin, fout, mode = "s"):
     fin -- filename of input file
     fout -- filename of output file
     '''
-    command = " ".join([settings.MEDIA_ROOT + "bin/gmyc.script.R",fin,mode])
+    command = " ".join([settings.GMYC_R, fin, mode])
     pbs_script = generate_pbs_script(scommand = command, fout = fout)
     jobok = job_submission(fscript = pbs_script)
 
@@ -134,12 +134,12 @@ def run_gmyc_queue(fin, fout, mode = "s"):
 def run_gmyc(fin, fout, mode = "s"):
     #GMYC.py -t example/gmyc_example.tre -ps
     #Popen(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/GMYC.py", "-t", fin, "-pvalue", str(pv), "-ps"], stdout=open(fout, "w"), stderr=open(fout+".err", "w") )
-    Popen(["nohup", settings.MEDIA_ROOT + "bin" + "/gmyc.script.R", fin, mode], stdout=open(fout, "w"), stderr=open(fout+".err", "w") )
+    Popen(["nohup", settings.GMYC_R, fin, mode], stdout=open(fout, "w"), stderr=open(fout+".err", "w") )
 
 
 def job_submission(fscript):
     try:
-        p1 = Popen(['qsub', fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        p1 = Popen(['qsub', settings.QSUB_FLAGS, fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     except OSError as e:
         logger.error('error in qsub ' + str(e) + '\nstderr:\n' + p1.communicate()[1])
         return False
@@ -156,5 +156,5 @@ def job_submission(fscript):
     if( p1.returncode == 0):
         return True
     
-    logger.error('qsub was not successful:\nreturncode:\n' + str(p1.returncode))
+    logger.error('qsub was not successful:\nreturncode:\n' + str(p1.returncode) + "\nstderr:\n" + p1.communicate()[1])
     return False

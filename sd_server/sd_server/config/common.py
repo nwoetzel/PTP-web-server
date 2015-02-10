@@ -171,3 +171,11 @@ class Common(Configuration):
             },
         }
     }
+    
+    @property
+    def QSUB_FLAGS(self):
+        return ""
+    
+    JOB_FOLDER = MEDIA_ROOT
+    PTP_PY     = os.path.sep.join( MEDIA_ROOT,"bin", "bPTP.py")
+    GMYC_R     = os.path.sep.join( MEDIA_ROOT,"bin", "gmyc.script.R")

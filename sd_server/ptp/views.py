@@ -70,7 +70,7 @@ def findjob(request):
                     return autherror(request)
             else:
                 return autherror(request)
-            out_path = settings.MEDIA_ROOT + str(job_id) + "/output"
+            out_path = os.path.join( [settings.JOB_FOLDER, job_id, "output"])
             with open(out_path) as outfile:
                 lines = outfile.readlines()
                 with open(out_path + ".err") as outfile2:
@@ -104,9 +104,9 @@ def ptp_index(request):
                 job.data_type = "ptree"
             job.method = "PTP"
             job.save()
-            filepath = settings.MEDIA_ROOT + repr(job.id) + "/" 
+            filepath = os.path.join( [settings.JOB_FOLDER, repr(job.id)]) 
             os.mkdir(filepath)
-            newfilename = filepath + "input.tre"
+            newfilename = os.path.join([filepath,"input.tre"])
             handle_uploaded_file(fin = request.FILES['treefile'] , fout = newfilename)
             job.filepath = filepath
             job.save()
@@ -122,7 +122,7 @@ def ptp_index(request):
             #os.chmod(filepath, 0777)
             jobok = run_ptp_queue(
                         fin = newfilename,
-                        fout = filepath + "output",
+                        fout = os.path.join([filepath,"output"]),
                         rooted = (ptp_form.cleaned_data['rooted'] == "rooted"),
                         nmcmc = nmcmc,
                         imcmc = imcmc,
@@ -154,9 +154,9 @@ def show_ptp_result(request, job_id = "", email = ""):
     else:
         return autherror(request)
     
-    out_path = settings.MEDIA_ROOT + job_id + "/output"
-    outpar = settings.MEDIA_ROOT + job_id +"/output.PTPPartitonSummary.txt"
-    outplot = settings.MEDIA_ROOT + job_id + "/output.PTPhSupportPartition.txt.png"
+    out_path = os.path.join( [settings.JOB_FOLDER, job_id, "output"])
+    outpar = os.path.join( [settings.JOB_FOLDER, job_id, "output.PTPPartitonSummary.txt"])
+    outplot = os.path.join( [settings.JOB_FOLDER, job_id, "output.PTPhSupportPartition.txt.png"])
     
     frees, totals = server_stats() 
     
@@ -179,8 +179,8 @@ def show_ptp_result(request, job_id = "", email = ""):
 
 def show_phylomap_result(request):
     job_id = request.GET.get('job_id', '')
-    out_path_line = settings.MEDIA_ROOT + job_id + "/output.phylomap.line.txt"
-    out_path_var = settings.MEDIA_ROOT + job_id + "/output.phylomap.var"
+    out_path_line = os.path.join( [settings.JOB_FOLDER, job_id, "output.phylomap.line.txt"])
+    out_path_var = os.path.join( [settings.JOB_FOLDER, job_id, "output.phylomap.var"])
     context = {'jobid':job_id}
     if os.path.exists(out_path_line):
         if os.path.exists(out_path_var):
@@ -203,25 +203,25 @@ def run_ptp(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = Fals
     #print(outgroup)
     if rooted:
         if outgroup == "":
-            Popen(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+            Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
             "-b", str(burnin), "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
         else:
             if remove:
-                Popen(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
             else:
-                Popen(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
     else:
         if outgroup == "":
-            Popen(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+            Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
             "-b", str(burnin), "-r", "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
         else:
             if remove:
-                Popen(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
             else:
-                Popen(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
 
             
@@ -229,24 +229,24 @@ def run_ptp_queue(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove 
     command = ""
     if rooted:
         if outgroup == "":
-            command = " ".join(["python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), "-b", str(burnin), "-k", "1"])
+            command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), "-b", str(burnin), "-k", "1"])
         else:
             if remove:
-                command = " ".join(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"])
             else:
-                command = " ".join(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"])
     else:
         if outgroup == "":
-            command = " ".join(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+            command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
             "-b", str(burnin), "-r", "-k", "1"])
         else:
             if remove:
-                command = " ".join(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"])
             else:
-                command = " ".join(["nohup", "python",  settings.MEDIA_ROOT + "bin" + "/bPTP.py", "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"])
 #     sge_script = generate_sge_script(scommand = command, fout = fout)
 #     jobok = job_submission(fscript = sge_script)
@@ -297,11 +297,11 @@ def generate_sge_script(scommand, fout):
 
 def job_submission(fscript):
     try:
-        p1 = Popen(['qsub', fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        p1 = Popen(['qsub', settings.QSUB_FLAGS, fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     except OSError as e:
         logger.error('error in qsub ' + str(e) + '\nstderr:\n' + p1.communicate()[1])
         return False
-    # try for 5 seocnds if job is done
+    # try for 5 seconds if job is done
     i = 0
     while p1.poll() is None:
         ++i
@@ -314,6 +314,6 @@ def job_submission(fscript):
     if( p1.returncode == 0):
         return True
     
-    logger.error('qsub was not successful:\nreturncode:\n' + str(p1.returncode))
+    logger.error('qsub was not successful\ncommand:\n' + (' '.join(['qsub', settings.QSUB_FLAGS, fscript])) + '\nreturncode:\n' + str(p1.returncode)+ "\nstderr:\n" + p1.communicate()[1])
     return False
 
