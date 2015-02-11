@@ -273,24 +273,24 @@ def server_stats():
 def generate_pbs_script(scommand, fout):
     filename = fout+".pbs.sh"
     with open(filename, "w") as fsh:
-        fsh.write("#!/bin/bash \n")
-        fsh.write("#PBS -S /bin/bash \n")
+        fsh.write("#!/bin/bash\n")
+        fsh.write("#PBS -S /bin/bash\n")
         fsh.write("#PBS -o "+ fout + "\n")
         fsh.write("#PBS -e "+ fout + ".err \n")
-        fsh.write("#PBS -W umask=022\n") # readable by group and all also
+        fsh.write("#PBS -W umask=022\n\n") # readable by group and all also
         fsh.write("export DISPLAY=:1\n")
-        fsh.write("Xvfb $DISPLAY -auth /dev/null &")
+        fsh.write("Xvfb $DISPLAY -auth /dev/null &\n\n")
         fsh.write(scommand + "\n")
     return filename
 
 
 def generate_sge_script(scommand, fout):
     with open(fout+".sge.sh", "w") as fsh:
-        fsh.write("#!/bin/bash \n")
-        fsh.write("#$ -S /bin/bash \n")
+        fsh.write("#!/bin/bash\n")
+        fsh.write("#$ -S /bin/bash\n")
         fsh.write("#$ -o "+fout + "\n")
-        fsh.write("#$ -e "+fout+".err \n")
-        fsh.write("#$ -v DISPLAY \n")
+        fsh.write("#$ -e "+fout+".err\n")
+        fsh.write("#$ -v DISPLAY\n\n")
         fsh.write(scommand + "\n")
     return fout+".sge.sh"
 
