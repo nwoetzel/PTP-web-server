@@ -224,7 +224,6 @@ def run_ptp(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = Fals
                 Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
 
-            
 def run_ptp_queue(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = False,  rooted = False):
     command = ""
     if rooted:
@@ -232,21 +231,21 @@ def run_ptp_queue(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove 
             command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), "-b", str(burnin), "-k", "1"])
         else:
             if remove:
-                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"])
             else:
-                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"])
     else:
         if outgroup == "":
-            command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+            command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
             "-b", str(burnin), "-r", "-k", "1"])
         else:
             if remove:
-                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"])
             else:
-                command = " ".join(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
+                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
                 "-b", str(burnin), "-g", outgroup, "-k", "1"])
 #     sge_script = generate_sge_script(scommand = command, fout = fout)
 #     jobok = job_submission(fscript = sge_script)
@@ -273,14 +272,41 @@ def server_stats():
 def generate_pbs_script(scommand, fout):
     filename = fout+".pbs.sh"
     with open(filename, "w") as fsh:
-        fsh.write("#!/bin/bash\n")
-        fsh.write("#PBS -S /bin/bash\n")
-        fsh.write("#PBS -o "+ fout + "\n")
-        fsh.write("#PBS -e "+ fout + ".err \n")
-        fsh.write("#PBS -W umask=022\n\n") # readable by group and all also
-        fsh.write("export DISPLAY=:1\n")
-        fsh.write("Xvfb $DISPLAY -auth /dev/null &\n\n")
+        fsh.write("#!/bin/bash\n"
+                  "#PBS -S /bin/bash\n"
+                  "#PBS -o "+ fout + "\n"
+                  "#PBS -e "+ fout + ".err \n"
+                  "#PBS -W umask=022\n\n" # readable by group and all also
+        #https://gist.github.com/tyleramos/3744901
+                  "SERVERNUM=99\n"
+                  "find_free_servernum() {\n"
+                  "  i=$SERVERNUM\n"
+                  "  while [ -f /tmp/.X$i-lock ]; do\n"
+                  "    i=$(($i + 1))\n"
+                  "  done\n"
+                  "  echo $i\n"
+                  "}\n"
+                  "\n"
+                  "tries=10\n"
+                  "while [ $tries -gt 0 ]; do\n"
+                  "  tries=$(( $tries - 1 ))\n"
+                  "  Xvfb \":$SERVERNUM\" -auth /dev/null &\n\n"
+                  "  XVFBPID=$!\n"
+                  "  sleep 3 # wait before starting commands\n"
+                  "\n"
+                  "  if kill -0 $XVFBPID 2>/dev/null; then\n"
+                  "    break\n"
+                  "  else # server is in use, try another one\n"
+                  "    SERVERNUM=$((SERVERNUM + 1))\n"
+                  "    SERVERNUM=$(find_free_servernum)\n"
+                  "    continue\n"
+                  "  fi\n"
+                  "  error \"Xvfb failed to start\" >&2\n"
+                  "done\n"
+                  "\n"
+                  "export DISPLAY=:SERVERNUM\n")
         fsh.write(scommand + "\n")
+        fsh.write("kill $XVFBPID")
     return filename
 
 
