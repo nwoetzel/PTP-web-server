@@ -2,7 +2,6 @@
 from configurations import Configuration, values
 
 import os
-from configurations.decorators import pristinemethod
 
 class Common(Configuration):
     PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -173,10 +172,10 @@ class Common(Configuration):
         }
     }
     
-    @pristinemethod
+    @property
     def QSUB_FLAGS(self):
         return []
     
-    JOB_FOLDER = MEDIA_ROOT
+    JOB_FOLDER = values.PathValue( MEDIA_ROOT)
     PTP_PY     = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "bPTP.py"))
     GMYC_R     = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "gmyc.script.R"))
