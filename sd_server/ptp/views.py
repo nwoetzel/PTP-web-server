@@ -290,7 +290,7 @@ def generate_pbs_script(scommand, fout):
                   "tries=10\n"
                   "while [ $tries -gt 0 ]; do\n"
                   "  tries=$(( $tries - 1 ))\n"
-                  "  Xvfb \":$SERVERNUM\" -auth /dev/null &\n\n"
+                  "  Xvfb \":$SERVERNUM\" -auth /dev/null >&2 &\n"
                   "  XVFBPID=$!\n"
                   "  sleep 3 # wait before starting commands\n"
                   "\n"
@@ -304,7 +304,7 @@ def generate_pbs_script(scommand, fout):
                   "  error \"Xvfb failed to start\" >&2\n"
                   "done\n"
                   "\n"
-                  "export DISPLAY=:SERVERNUM\n")
+                  "export DISPLAY=:$SERVERNUM\n")
         fsh.write(scommand + "\n")
         fsh.write("kill $XVFBPID")
     return filename
