@@ -2,6 +2,7 @@
 from configurations import Configuration, values
 
 import os
+from configurations.decorators import pristinemethod
 
 class Common(Configuration):
     PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -172,9 +173,9 @@ class Common(Configuration):
         }
     }
     
-    @property
+    @pristinemethod
     def QSUB_FLAGS(self):
-        return ""
+        return []
     
     JOB_FOLDER = MEDIA_ROOT
     PTP_PY     = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "bPTP.py"))

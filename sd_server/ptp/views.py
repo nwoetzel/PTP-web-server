@@ -199,57 +199,34 @@ def handle_uploaded_file(fin, fout):
             destination.write(chunk)
 
 
+def assemble_command(fin, fout, nmcmc, imcmc, burnin, seed, outgroup, remove, rooted):
+    command = ["python", settings.PTP_PY]
+    #input and output
+    command.extend(["-t", fin,"-o", fout])
+    #seed
+    command.extend(["-s", str(seed)])
+    #options
+    command.extend(["-i", str(nmcmc), "-n", str(imcmc), "-b", str(burnin)])
+    if outgroup != "":
+        command.extend(["-g", outgroup])
+        if remove:
+            command.append("-d")
+    elif not rooted:
+        command.append("-r")
+    command.extend(["-k", "1"])
+    
+    # end
+    return command
+
 def run_ptp(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = False,  rooted = False):
-    #print(outgroup)
-    if rooted:
-        if outgroup == "":
-            Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-            "-b", str(burnin), "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
-        else:
-            if remove:
-                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
-            else:
-                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
-    else:
-        if outgroup == "":
-            Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-            "-b", str(burnin), "-r", "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
-        else:
-            if remove:
-                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
-            else:
-                Popen(["nohup", "python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-k", "1"], stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
+    command = assemble_command(fin, fout, nmcmc, imcmc, burnin, seed, outgroup, remove, rooted)
+    command.insert(0, "nohup")
+    Popen( command, stdout=open(fout, "w"), stderr=open(fout+".err", "w"))
 
 def run_ptp_queue(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove = False,  rooted = False):
-    command = ""
-    if rooted:
-        if outgroup == "":
-            command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), "-b", str(burnin), "-k", "1"])
-        else:
-            if remove:
-                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"])
-            else:
-                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-k", "1"])
-    else:
-        if outgroup == "":
-            command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-            "-b", str(burnin), "-r", "-k", "1"])
-        else:
-            if remove:
-                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-d", "-k", "1"])
-            else:
-                command = " ".join(["python", settings.PTP_PY, "-t", fin, "-o", fout, "-s", str(seed), "-i", str(nmcmc), "-n", str(imcmc), 
-                "-b", str(burnin), "-g", outgroup, "-k", "1"])
-#     sge_script = generate_sge_script(scommand = command, fout = fout)
-#     jobok = job_submission(fscript = sge_script)
-    pbs_script = generate_pbs_script(scommand = command, fout = fout)
+    command = assemble_command(fin, fout, nmcmc, imcmc, burnin, seed, outgroup, remove, rooted)
+    
+    pbs_script = generate_pbs_script(scommand = " ".join(command), fout = fout)
     jobok = job_submission(fscript = pbs_script)
 
     return jobok
@@ -322,10 +299,14 @@ def generate_sge_script(scommand, fout):
 
 
 def job_submission(fscript):
+    qsub_command = ['qsub']
+    qsub_command.extend( settings.QSUB_FLAGS)
+    qsub_command.append(fscript)
+    
     try:
-        p1 = Popen(['qsub', settings.QSUB_FLAGS, fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        p1 = Popen(qsub_command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     except OSError as e:
-        logger.error('error in qsub ' + str(e) + '\nstderr:\n' + p1.communicate()[1])
+        logger.error('error in qsub ' + str(e) + '\ncommand:\n' + (' '.join(qsub_command)) + '\nstderr:\n' + p1.communicate()[1])
         return False
     # try for 5 seconds if job is done
     i = 0
@@ -340,6 +321,6 @@ def job_submission(fscript):
     if( p1.returncode == 0):
         return True
     
-    logger.error('qsub was not successful\ncommand:\n' + (' '.join(['qsub', settings.QSUB_FLAGS, fscript])) + '\nreturncode:\n' + str(p1.returncode)+ "\nstderr:\n" + p1.communicate()[1])
+    logger.error('qsub was not successful\ncommand:\n' + (' '.join(qsub_command)) + '\nreturncode:\n' + str(p1.returncode)+ "\nstderr:\n" + p1.communicate()[1])
     return False
 
