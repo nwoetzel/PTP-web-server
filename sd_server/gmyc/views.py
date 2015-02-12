@@ -56,7 +56,7 @@ def gmyc_index(request):
             
             mode = gmyc_form.cleaned_data['method']
             
-            jobok = run_gmyc_queue(fin = newfilename, fout = filepath + "output", mode = mode)
+            jobok = run_gmyc_queue(fin = newfilename, fout = os.path.join(filepath, "output"), mode = mode)
             if jobok:
                 return show_gmyc_result(request, job_id = str(job.id), email = job.email)
             else:
