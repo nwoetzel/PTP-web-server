@@ -138,8 +138,11 @@ def run_gmyc(fin, fout, mode = "s"):
 
 
 def job_submission(fscript):
+    qsub_command = ['qsub']
+    qsub_command.extend(settings.QSUB_FLAGS)
+    qsub_command.append(fscript)
     try:
-        p1 = Popen(['qsub', settings.QSUB_FLAGS, fscript], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        p1 = Popen(qsub_command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     except OSError as e:
         logger.error('error in qsub ' + str(e) + '\nstderr:\n' + p1.communicate()[1])
         return False
