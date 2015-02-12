@@ -139,14 +139,15 @@ def run_gmyc(fin, fout, mode = "s"):
 
 def job_submission(fscript):
     qsub_command = ['qsub']
-    qsub_command.extend(settings.QSUB_FLAGS)
+    qsub_command.extend( settings.QSUB_FLAGS)
     qsub_command.append(fscript)
+    
     try:
         p1 = Popen(qsub_command, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     except OSError as e:
-        logger.error('error in qsub ' + str(e) + '\nstderr:\n' + p1.communicate()[1])
+        logger.error('error in qsub ' + str(e) + '\ncommand:\n' + (' '.join(qsub_command)) + '\nstderr:\n' + p1.communicate()[1])
         return False
-    # try for 5 seocnds if job is done
+    # try for 5 seconds if job is done
     i = 0
     while p1.poll() is None:
         ++i
@@ -159,5 +160,5 @@ def job_submission(fscript):
     if( p1.returncode == 0):
         return True
     
-    logger.error('qsub was not successful:\nreturncode:\n' + str(p1.returncode) + "\nstderr:\n" + p1.communicate()[1])
+    logger.error('qsub was not successful\ncommand:\n' + (' '.join(qsub_command)) + '\nreturncode:\n' + str(p1.returncode)+ "\nstderr:\n" + p1.communicate()[1])
     return False
