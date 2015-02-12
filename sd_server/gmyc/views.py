@@ -80,10 +80,10 @@ def show_gmyc_result(request, job_id = "", email = ""):
     else:
         return autherror(request)
     
-    out_path = os.path.join( settings.JOB_FOLDER, job_id, "input.tre_summary")
+    out_path = os.path.join( settings.JOB_FOLDER, str(job_id), "input.tre_summary")
     #screenout = settings.MEDIA_ROOT + job_id + "/output"
-    err = os.path.join( settings.JOB_FOLDER, job_id, "output.err")
-    plot = os.path.join( settings.JOB_FOLDER, job_id, "input.tre_plot.png")
+    err = os.path.join( settings.JOB_FOLDER, str(job_id), "output.err")
+    plot = os.path.join( settings.JOB_FOLDER, str(job_id), "input.tre_plot.png")
     
     if os.path.exists(out_path) and os.path.exists(plot):
         with open(out_path) as outfile:
