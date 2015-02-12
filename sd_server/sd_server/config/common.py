@@ -169,6 +169,11 @@ class Common(Configuration):
                 'level': 'ERROR',
                 'propagate': False,
             },
+            'gmyc': {
+                'handlers': ['console'],
+                'level': 'ERROR',
+                'propagate': False,
+            },
         }
     }
     
