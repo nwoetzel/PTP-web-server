@@ -282,7 +282,12 @@ def generate_pbs_script(scommand, fout):
                   "done\n"
                   "\n"
                   "export DISPLAY=:$SERVERNUM\n")
+        if settings.PYTHON_VIRTENV:
+            fsh.write("source " + os.path.join( settings.PYTHON_VIRTENV, "bin", "activate"))
         fsh.write(scommand + "\n")
+        if settings.PYTHON_VIRTENV:
+            fsh.write("deactivate")
+
         fsh.write("kill $XVFBPID")
     return filename
 
