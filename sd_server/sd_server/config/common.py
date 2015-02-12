@@ -177,5 +177,7 @@ class Common(Configuration):
         return []
     
     JOB_FOLDER = values.PathValue( MEDIA_ROOT)
-    PTP_PY     = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "bPTP.py"))
-    GMYC_R     = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "gmyc.script.R"))
+    PYTHON_VIRTENV = ""
+    PTP_PY         = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "bPTP.py"))
+    R_BINARY       = "R"
+    GMYC_R         = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "gmyc.script.R"))

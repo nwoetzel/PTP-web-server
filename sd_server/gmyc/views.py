@@ -124,7 +124,7 @@ def run_gmyc_queue(fin, fout, mode = "s"):
     fin -- filename of input file
     fout -- filename of output file
     '''
-    command = " ".join([settings.GMYC_R, fin, mode])
+    command = " ".join([settings.R_BINARY, settings.GMYC_R, fin, mode])
     pbs_script = generate_pbs_script(scommand = command, fout = fout)
     jobok = job_submission(fscript = pbs_script)
 
