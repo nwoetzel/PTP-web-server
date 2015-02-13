@@ -108,7 +108,7 @@ Before reading the following text, please check: https://github.com/zhangjiajie/
     
 (8) Web server
 
-    There is also a simple and experimental web server avaliable for PTP:
+    There is also a simple and experimental web server available for PTP:
     http://species.h-its.org/ptp/
     For the moment, I can not gurantee the web server is using the latest PTP implementation. So whenever possible, I encourage you to try this python program.
     

@@ -8,6 +8,7 @@ import subprocess
 import os
 import logging
 from time import sleep
+import xml.dom.minidom as minidom
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class jobform(forms.Form):
 
 def index(request):
     frees, totals = server_stats() 
-    context = {'avaliable':frees, 'total':totals}
+    context = {'available':frees, 'total':totals}
     return render(request, 'index.html', context)
 
 
@@ -138,7 +139,7 @@ def ptp_index(request):
                 return queue_error(request)
     else:
         ptp_form = PTPForm() # An unbound form
-    context = {'pform':ptp_form, 'avaliable':frees, 'total':totals}
+    context = {'pform':ptp_form, 'available':frees, 'total':totals}
     return render(request, 'ptp/index.html', context)
 
 
@@ -164,17 +165,17 @@ def show_ptp_result(request, job_id = "", email = ""):
         with open(out_path) as outfile:
             lines = outfile.readlines()
             results="<br/>".join(lines)
-            context = {'result':results, 'jobid':job_id, 'email':email, 'avaliable':frees, 'total':totals}
+            context = {'result':results, 'jobid':job_id, 'email':email, 'available':frees, 'total':totals}
             return render(request, 'ptp/results.html', context)
     elif os.path.exists(out_path + ".err"):
         with open(out_path + ".err") as outfile2:
             lines2 = outfile2.readlines()
             if len(lines2) > 0:
-                return render(request, 'ptp/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email, 'avaliable':frees, 'total':totals})
+                return render(request, 'ptp/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
             else:
-                return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'avaliable':frees, 'total':totals})
+                return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
     else:
-        return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'avaliable':frees, 'total':totals})
+        return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
 
 
 def show_phylomap_result(request):
@@ -233,18 +234,21 @@ def run_ptp_queue(fin, fout, nmcmc, imcmc, burnin, seed, outgroup = "" , remove 
 
 
 def server_stats():
-    #return avaliable and total slots
+    #return free nodes and total number of nodes
     try: 
-        p1 = Popen(['qstat', '-g', 'c'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        stdout = p1.communicate()[0]
-        solines = stdout.split("\n")
-        sstats = solines[2].split()
-        return sstats[4], sstats[5]
-    except OSError as e:
-        logger.error('error in qstat ' + str(e))
-    except IndexError as e:
-        logger.error('error in qstat ' + str(e))
+        p1 = Popen(['pbsnodes', '-x'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        dom = minidom.parseString( p1.communicate()[0])
+        node_states = dom.getElementsByTagName("state")
+        free = 0
+        for state in node_states:
+            if state.childNodes[0].data == "free":
+                free += 1
+
+        return free, len(node_states)
+    except Exception as e:
+        logger.error('error in server_stats ' + str(e))
     return 0, 0
+
 
 def generate_pbs_script(scommand, fout):
     filename = fout+".pbs.sh"
