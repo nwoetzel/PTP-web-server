@@ -181,6 +181,8 @@ class Common(Configuration):
     def QSUB_FLAGS(self):
         return []
     
+    QUEUE_SERVER = ""
+    
     JOB_FOLDER = values.PathValue( MEDIA_ROOT)
     PYTHON_VIRTENV = ""
     PTP_PY         = values.PathValue( os.path.join( MEDIA_ROOT.default,"bin", "bPTP.py"))

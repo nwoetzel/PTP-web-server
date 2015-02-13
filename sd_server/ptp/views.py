@@ -248,11 +248,15 @@ def server_stats():
 
 def generate_pbs_script(scommand, fout):
     filename = fout+".pbs.sh"
+    host = ""
+    if( settings.QUEUE_SERVER != ""):
+        host += settings.QUEUE_SERVER+":"
+    
     with open(filename, "w") as fsh:
         fsh.write("#!/bin/bash\n"
                   "#PBS -S /bin/bash\n"
-                  "#PBS -o "+ fout + "\n"
-                  "#PBS -e "+ fout + ".err \n"
+                  "#PBS -o "+ host + fout + "\n"
+                  "#PBS -e "+ host + fout + ".err \n"
                   "#PBS -W umask=022\n\n" # readable by group and all also
         #https://gist.github.com/tyleramos/3744901
                   "SERVERNUM=99\n"
