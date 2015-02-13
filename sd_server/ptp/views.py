@@ -289,10 +289,12 @@ def generate_pbs_script(scommand, fout):
         if settings.PYTHON_VIRTENV != "":
             fsh.write("source " + os.path.join( settings.PYTHON_VIRTENV, "bin", "activate") + "\n")
         fsh.write(scommand + "\n")
+        fsh.write("RETURN_CODE=$?\n")
         if settings.PYTHON_VIRTENV != "":
             fsh.write("deactivate\n")
-
-        fsh.write("kill $XVFBPID")
+        fsh.write("kill $XVFBPID\n")
+        fsh.write("exit $RETURN_CODE\n")
+        
     return filename
 
 
