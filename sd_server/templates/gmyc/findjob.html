@@ -1,0 +1,10 @@
+{% extends "gmyc/base.html" %}
+{% block forms %}
+    <p>
+    <form action="/gmyc/findjob/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ jform.as_p }}
+    <input type="submit" value="Submit" />
+    </form>
+    </p>
+{% endblock %}

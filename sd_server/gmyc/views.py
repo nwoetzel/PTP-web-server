@@ -18,6 +18,11 @@ class GMYCForm(forms.Form):
     sender = forms.EmailField(label='My e-mail address:')
 
 
+class jobform(forms.Form):
+    job_id = forms.IntegerField(label = "Job id:")
+    sender = forms.EmailField(label='E-mail address:')
+
+
 def index(request):
     context = {}
     return render(request, 'index.html', context)
@@ -33,6 +38,38 @@ def autherror(request):
 
 def queue_error(request):
     return HttpResponse("There is something wrong with the computational queue, please try again later!")
+
+
+def findjob(request):
+    if request.method == 'POST': # If the form has been submitted...
+        jform = jobform(request.POST)
+        if jform.is_valid():
+            email = jform.cleaned_data['sender']
+            job_id = jform.cleaned_data['job_id']
+            jobs = Jobs.objects.filter(id=job_id)
+            if len(jobs) > 0:
+                if jobs[0].email != email:
+                    return autherror(request)
+            else:
+                return autherror(request)
+            out_path = os.path.join( settings.JOB_FOLDER, job_id, "output")
+            with open(out_path) as outfile:
+                lines = outfile.readlines()
+                with open(out_path + ".err") as outfile2:
+                    lines2 = outfile2.readlines()
+                    if len(lines) > 5:
+                        results="<br/>".join(lines)
+                        context = {'result':results, 'jobid':job_id, 'email':email}
+                        return render(request, 'gmyc/results.html', context)
+                    else:
+                        if len(lines2) > 3:
+                            return render(request, 'gmyc/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email})
+                        else:
+                            return render(request, 'gmyc/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email})
+    else:
+        jform = jobform()
+    context = {'jform':jform}
+    return render(request, 'gmyc/findjob.html', context)
 
 
 def gmyc_index(request):
@@ -108,11 +145,14 @@ def handle_uploaded_file(fin, fout):
 
 def generate_pbs_script(scommand, fout):
     filename = fout+".pbs.sh"
+    host = ""
+    if( settings.QUEUE_SERVER != ""):
+        host += settings.QUEUE_SERVER+":"
     with open(filename, "w") as fsh:
         fsh.write("#!/bin/bash\n")
         fsh.write("#PBS -S /bin/bash\n")
-        fsh.write("#PBS -o "+ fout + "\n")
-        fsh.write("#PBS -e "+ fout + ".err\n")
+        fsh.write("#PBS -o " + host + fout + "\n")
+        fsh.write("#PBS -e " + host + fout + ".err\n")
         fsh.write("#PBS -W umask=022\n\n") # readable by group and all also
         fsh.write(scommand + "\n")
     return filename
