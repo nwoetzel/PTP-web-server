@@ -71,9 +71,9 @@ def findjob(request):
                     return autherror(request)
             else:
                 return autherror(request)
-            out_path = os.path.join( settings.JOB_FOLDER, job_id, "output")
-            outpar = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPPartitonSummary.txt")
-            outplot = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPhSupportPartition.txt.png")
+            out_path = os.path.join( settings.JOB_FOLDER, str(job_id), "output")
+            outpar = os.path.join( settings.JOB_FOLDER, str(job_id), "output.PTPPartitonSummary.txt")
+            outplot = os.path.join( settings.JOB_FOLDER, str(job_id), "output.PTPhSupportPartition.txt.png")
 
             frees, totals = server_stats() 
             
@@ -160,9 +160,9 @@ def show_ptp_result(request, job_id = "", email = ""):
     else:
         return autherror(request)
     
-    out_path = os.path.join( settings.JOB_FOLDER, job_id, "output")
-    outpar = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPPartitonSummary.txt")
-    outplot = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPhSupportPartition.txt.png")
+    out_path = os.path.join( settings.JOB_FOLDER, str(job_id), "output")
+    outpar = os.path.join( settings.JOB_FOLDER, str(job_id), "output.PTPPartitonSummary.txt")
+    outplot = os.path.join( settings.JOB_FOLDER, str(job_id), "output.PTPhSupportPartition.txt.png")
     
     frees, totals = server_stats() 
     
@@ -183,8 +183,8 @@ def show_ptp_result(request, job_id = "", email = ""):
 
 def show_phylomap_result(request):
     job_id = request.GET.get('job_id', '')
-    out_path_line = os.path.join( settings.JOB_FOLDER, job_id, "output.phylomap.line.txt")
-    out_path_var = os.path.join( settings.JOB_FOLDER, job_id, "output.phylomap.var")
+    out_path_line = os.path.join( settings.JOB_FOLDER, str(job_id), "output.phylomap.line.txt")
+    out_path_var = os.path.join( settings.JOB_FOLDER, str(job_id), "output.phylomap.var")
     context = {'jobid':job_id}
     if os.path.exists(out_path_line):
         if os.path.exists(out_path_var):
