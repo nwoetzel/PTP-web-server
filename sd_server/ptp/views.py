@@ -72,19 +72,24 @@ def findjob(request):
             else:
                 return autherror(request)
             out_path = os.path.join( settings.JOB_FOLDER, job_id, "output")
-            with open(out_path) as outfile:
-                lines = outfile.readlines()
-                with open(out_path + ".err") as outfile2:
-                    lines2 = outfile2.readlines()
-                    if len(lines) > 5:
-                        results="<br/>".join(lines)
-                        context = {'result':results, 'jobid':job_id, 'email':email}
-                        return render(request, 'ptp/results.html', context)
-                    else:
-                        if len(lines2) > 3:
-                            return render(request, 'ptp/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email})
-                        else:
-                            return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email})
+            outpar = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPPartitonSummary.txt")
+            outplot = os.path.join( settings.JOB_FOLDER, job_id, "output.PTPhSupportPartition.txt.png")
+
+            frees, totals = server_stats() 
+            
+            # finished?
+            if not os.path.exists(out_path):
+                return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
+            # at least two of the expected output files exists
+            if os.path.exists(outpar) and os.path.exists(outplot):
+                with open(out_path) as outfile:
+                    lines = outfile.readlines()
+                    results="<br/>".join(lines)
+                    context = {'result':results, 'jobid':job_id, 'email':email}
+                    return render(request, 'ptp/results.html', context)
+            # the expected output files are not there
+            else:
+                return render(request, 'ptp/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
     else:
         jform = jobform()
     context = {'jform':jform}
@@ -161,21 +166,19 @@ def show_ptp_result(request, job_id = "", email = ""):
     
     frees, totals = server_stats() 
     
-    if os.path.exists(outpar) and os.path.exists(outplot) and os.path.exists(out_path):
+    # finished?
+    if not os.path.exists(out_path):
+        return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
+    # at least two of the expected output files exists
+    if os.path.exists(outpar) and os.path.exists(outplot):
         with open(out_path) as outfile:
             lines = outfile.readlines()
             results="<br/>".join(lines)
-            context = {'result':results, 'jobid':job_id, 'email':email, 'available':frees, 'total':totals}
+            context = {'result':results, 'jobid':job_id, 'email':email}
             return render(request, 'ptp/results.html', context)
-    elif os.path.exists(out_path + ".err"):
-        with open(out_path + ".err") as outfile2:
-            lines2 = outfile2.readlines()
-            if len(lines2) > 0:
-                return render(request, 'ptp/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
-            else:
-                return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
+    # the expected output files are not there
     else:
-        return render(request, 'ptp/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
+        return render(request, 'ptp/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email, 'available':frees, 'total':totals})
 
 
 def show_phylomap_result(request):

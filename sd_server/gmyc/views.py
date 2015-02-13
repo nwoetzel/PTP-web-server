@@ -52,20 +52,23 @@ def findjob(request):
                     return autherror(request)
             else:
                 return autherror(request)
-            out_path = os.path.join( settings.JOB_FOLDER, job_id, "output")
+
+        out_path = os.path.join( settings.JOB_FOLDER, str(job_id), "input.tre_summary")
+        plot = os.path.join( settings.JOB_FOLDER, str(job_id), "input.tre_plot.png")
+        
+        # job finished?
+        if not os.path.exists(out_path):
+            return render(request, 'gmyc/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email})
+        # expected output file
+        if os.path.exists(plot):
             with open(out_path) as outfile:
                 lines = outfile.readlines()
-                with open(out_path + ".err") as outfile2:
-                    lines2 = outfile2.readlines()
-                    if len(lines) > 5:
-                        results="<br/>".join(lines)
-                        context = {'result':results, 'jobid':job_id, 'email':email}
-                        return render(request, 'gmyc/results.html', context)
-                    else:
-                        if len(lines2) > 3:
-                            return render(request, 'gmyc/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email})
-                        else:
-                            return render(request, 'gmyc/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email})
+                results="<br/>".join(lines)
+                context = {'result':results, 'jobid':job_id}
+                return render(request, 'gmyc/results.html', context)
+        # expected output does not exist
+        else:
+            return render(request, 'gmyc/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email})
     else:
         jform = jobform()
     context = {'jform':jform}
@@ -118,23 +121,21 @@ def show_gmyc_result(request, job_id = "", email = ""):
         return autherror(request)
     
     out_path = os.path.join( settings.JOB_FOLDER, str(job_id), "input.tre_summary")
-    #screenout = settings.MEDIA_ROOT + job_id + "/output"
-    err = os.path.join( settings.JOB_FOLDER, str(job_id), "output.err")
     plot = os.path.join( settings.JOB_FOLDER, str(job_id), "input.tre_plot.png")
     
-    if os.path.exists(out_path) and os.path.exists(plot):
+    # job finished?
+    if not os.path.exists(out_path):
+        return render(request, 'gmyc/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email})
+    # expected output file
+    if os.path.exists(plot):
         with open(out_path) as outfile:
             lines = outfile.readlines()
             results="<br/>".join(lines)
             context = {'result':results, 'jobid':job_id}
             return render(request, 'gmyc/results.html', context)
+    # expected output does not exist
     else:
-        with open(err) as ferr:
-            lines = ferr.readlines()
-            if len(lines) > 5:
-                return render(request, 'gmyc/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email})
-            else:
-                return render(request, 'gmyc/results.html', {'result':"Job still running", 'jobid':job_id, 'email':email})
+        return render(request, 'gmyc/results.html', {'result':"Something is wrong, please check your input file", 'jobid':job_id, 'email':email})
 
 
 def handle_uploaded_file(fin, fout):
