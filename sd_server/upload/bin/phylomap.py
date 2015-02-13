@@ -15,6 +15,7 @@ try:
     from numpy.linalg import eigh
     import numpy as np
     import matplotlib.pyplot as plt
+    import scipy.special
 except ImportError:
     print("Please install the matplotlib and other dependent package first.")
     print("If your OS is ubuntu or has apt installed, you can try the following:") 
@@ -406,8 +407,8 @@ class phylomap:
                 r_tree_dis = self.innernode_dis_tree_matrix[node.name + ":" + childs[1].name] 
                 l_ratio = (l_tree_dis - l_mds_dis)/l_mds_dis
                 r_ratio = (r_tree_dis - r_mds_dis)/r_mds_dis
-                lstroke = math.erf(l_ratio)
-                rstroke = math.erf(r_ratio)
+                lstroke = scipy.special.erf(l_ratio)
+                rstroke = scipy.special.erf(r_ratio)
                 if lstroke < 0:
                     lstroke = 2.0
                 else:

@@ -160,7 +160,7 @@ def show_ptp_result(request, job_id = "", email = ""):
     
     frees, totals = server_stats() 
     
-    if os.path.exists(outpar) and os.path.exists(outplot):
+    if os.path.exists(outpar) and os.path.exists(outplot) and os.path.exists(out_path):
         with open(out_path) as outfile:
             lines = outfile.readlines()
             results="<br/>".join(lines)
