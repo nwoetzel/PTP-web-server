@@ -19,16 +19,14 @@ Clone the repository to {your_software_path} - yopu can use the same install loc
 `Rscript sd_server/requirements.R`
 
 This of course assumes, that pip and R are available.
-`easy_install pip` should install pip
-`apt-get install r-base-core --no-install-recommends` should install R on ubuntu - similar packages are available for other Linux distributions
-Additionally, PTP uses [ete](http://etetoolkit.org/) [ete2](http://pythonhosted.org/ete2/) for visualiziation which in turn requires PyQt4 which cannot be installed via pip, but through the package manager of your OS:
-`apt-get install python-qt4`
-You can also compile it yourself [PyQt in virtualenv](http://amyboyle.ninja/Python-Qt-and-virtualenv-in-linux/)
+`easy_install pip` should install pip.
+`apt-get install r-base-core` should install R on ubuntu - similar packages are available for other Linux distributions.
+Additionally, PTP uses [ete2](http://pythonhosted.org/ete2/) for visualiziation which in turn requires PyQt4 which cannot be installed via pip, but through the package manager of your OS:
+`apt-get install python-qt4`.
+You can also compile it yourself [PyQt in virtualenv](http://amyboyle.ninja/Python-Qt-and-virtualenv-in-linux/).
 An X-server is also required for ete2. Installation and setup are described here:
 http://pythonhosted.org/ete2/tutorial/tutorial_webplugin.html#servers
-The code currently assumes, that [Xvfb](http://de.wikipedia.org/wiki/Xvfb) is installed
-`apt-get install xvfb`
-which also works on a cluster environment nicely.
+The ptp-webserver code currently assumes, that [Xvfb](http://de.wikipedia.org/wiki/Xvfb) is installed: `apt-get install xvfb` which also works on a cluster environment nicely without having all xorg-server components installed and running.
 
 Deployment
 ----------
@@ -50,6 +48,7 @@ create a /etc/apache2/sites-available/ptp.conf and add this
         Require all granted
     </Directory>
 </VirtualHost>
+</pre>
 
 GMYC
 ====
