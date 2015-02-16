@@ -37,7 +37,7 @@ Accordingly - go to manage.py and wsgi.py and change the DJANGO_CONFIGURATION to
 If you use apache to deploy dajngo, please consider using [mod_wsgi](https://code.google.com/p/modwsgi/)
 
 create a /etc/apache2/sites-available/ptp.conf and add this
-<pre><code>
+```xml
 <VirtualHost *:80>
     WSGIDaemonProcess sd_server python-path={your_install_path}/sd_server
     WSGIProcessGroup sd_server
@@ -48,7 +48,7 @@ create a /etc/apache2/sites-available/ptp.conf and add this
         Require all granted
     </Directory>
 </VirtualHost>
-</code></pre>
+```
 
 GMYC
 ====
