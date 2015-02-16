@@ -3,49 +3,57 @@ sd_web
 
 Species delimitation web server
 
-Provide web interface for PTP, GMYC, CROP and UCLUST
+Provide web interface for PTP and GMYC
 
+Installation
+------------
 
-Deploy:
-Change settings.py to the deployment enviroment
+### Webserver
+Clone the repository to {your_install_path}
+Install the python requirements
+`pip install -r {your_install_path}/sd_server/requirements_django.txt`
 
-See this page how to install and configure X server:
+### Software
+Clone the repository to {your_software_path} - yopu can use the same install location as for the webserver.
+`pip install -r {your_install_path}/sd_server/requirements_apps.txt`
+`Rscript sd_server/requirements.R`
+
+This of course assumes, that pip and R are available.
+`easy_install pip` should install pip
+`apt-get install r-base-core --no-install-recommends` should install R on ubuntu - similar packages are available for other Linux distributions
+Additionally, PTP uses [ete](http://etetoolkit.org/) [ete2](http://pythonhosted.org/ete2/) for visualiziation which in turn requires PyQt4 which cannot be installed via pip, but through the package manager of your OS:
+`apt-get install python-qt4`
+You can also compile it yourself [PyQt in virtualenv](http://amyboyle.ninja/Python-Qt-and-virtualenv-in-linux/)
+An X-server is also required for ete2. Installation and setup are described here:
 http://pythonhosted.org/ete2/tutorial/tutorial_webplugin.html#servers
-https://groups.google.com/forum/#!searchin/etetoolkit/x$20server$20/etetoolkit/XSIeQyX9W64/0mPc4n1SrDMJ
+The code currently assumes, that [Xvfb](http://de.wikipedia.org/wiki/Xvfb) is installed
+`apt-get install xvfb`
+which also works on a cluster environment nicely.
 
+Deployment
+----------
+This [django](https://www.djangoproject.com/) project uses [django-configurations](http://django-configurations.readthedocs.org/)
+Change sd_server/sd_server/config/production.py pr server.py by changing any of the configuration variables. 
+Accordingly - go to manage.py and wsgi.py and change the DJANGO_CONFIGURATION to the configuration class you want to use.
 
-Add this to /etc/apache2/httpd.conf:
-<pre><code>
-FastCGIExternalServer /webdata/sd_web/sd_server/sd_server.fcgi -host 193.197.73.70:2222
-</pre></code>
+If you use apache to deploy dajngo, please consider using [mod_wsgi](https://code.google.com/p/modwsgi/)
 
-Add this to /etc/apache2/sites-enabled/000-default:
-<pre><code>
+create a /etc/apache2/sites-available/ptp.conf and add this
+<pre>
 <VirtualHost *:80>
-  ServerName species.h-its.org
-  DocumentRoot /webdata/sd_web/sd_server
-  #alias /static /webdata/sd_web/sd_server/static
-  #alias /download /webdata/sd_web/sd_server/download
-  RewriteEngine On
-  RewriteRule ^/(static.*)$ /$1 [QSA,L,PT]
-  #RewriteRule ^/(download.*)$ /$1 [QSA,L,PT]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteRule ^/(.*)$ /sd_server.fcgi/$1 [QSA,L]
+    WSGIDaemonProcess sd_server python-path={your_install_path}/sd_server
+    WSGIProcessGroup sd_server
+    WSGIScriptAlias / {your_install_path}/sd_server/sd_server/wsgi.py
+    Alias /static/ {your_install_path}/sd_server/static/
+    
+    <Directory {your_install_path}/sd_server/static/>
+        Require all granted
+    </Directory>
 </VirtualHost>
-</pre></code>
 
-<pre><code> 
-export DISPLAY=localhost:0.0
-python manage.py runfcgi method=threaded host=193.197.73.70 port=2222
-sudo service apache2 restart
-</pre></code>
-
-
-INSTALL R GMYC:
-- install.packages("ape",repos="http://cran.r-project.org/")
-- install.packages("paran",repos="http://cran.r-project.org/")
-- install.packages("splits",repos="http://R-Forge.R-project.org")
-
+GMYC
+====
+the gmyc Rscript can be used independently
 $Rscript gmyc.script.R tree method
 
 input: an input tree in newick or nexus format (its name should end with ".tre" or ".nex".
@@ -59,5 +67,3 @@ xxxx_list: a tab-delimited text file of delimitation. it is an output of the spe
 xxxx_summary: a text file of summary of analysis from summary.gmyc.
 xxxx_plot.pdf: plots in pdf format.
 xxxx_plot.png: plots in png format.
-
-I think you should install r-base-dev as well as r-base to use Rscript command. 
